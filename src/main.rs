@@ -1,19 +1,31 @@
 #![no_std]
 #![no_main]
 
+mod gpio;
+mod rcc;
+
 extern crate disco_runtime;
 use disco_runtime::entry;
+use gpio::{GPIOBank, GPIOMode, GPIOResistor, GPIOSpeed, GPIOType, GPIO};
 
 entry!(main);
 
-static RODATA: &[u8] = b"Hello World!";
-static mut BSS: u8 = 0;
-static mut DATA: u16 = 1;
-
 pub fn main() -> ! {
-    let _x = RODATA;
-    let _y = unsafe { &BSS };
-    let _z = unsafe { &DATA };
+    const PIN_NUM: u32 = 8;
+    let gpio: GPIO = GPIO::init_gpio(GPIOBank::GPIOE, &PIN_NUM);
+    gpio.configure_gpio_pin(
+        GPIOMode::GpioModeOutput,
+        GPIOType::GpioTypePushPull,
+        GPIOSpeed::GpioSpeedMedium,
+        GPIOResistor::GpioPupdrNone,
+        &PIN_NUM,
+    );
 
+    loop {}
+}
+
+#[allow(non_snake_case)]
+#[no_mangle]
+pub fn HardFault(_ef: *const u32) -> ! {
     loop {}
 }
